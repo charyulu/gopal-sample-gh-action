@@ -1,0 +1,43 @@
+name: 'Publish Commit Info'
+description: 'Publishes the repository name, branch, committer and date/time of the commit'
+outputs:
+  repository:
+    description: 'Repository name'
+    value: ${{ steps.info.outputs.repository }}
+  branch:
+    description: 'Branch name'
+    value: ${{ steps.info.outputs.branch }}
+  user:
+    description: 'User who committed the code'
+    value: ${{ steps.info.outputs.user }}
+  datetime:
+    description: 'Date and time of the commit'
+    value: ${{ steps.info.outputs.datetime }}
+runs:
+  using: 'composite'
+  steps:
+    - id: info
+      shell: bash
+      env:
+        REPOSITORY: ${{ github.repository }}
+        BRANCH: ${{ github.head_ref || github.ref_name }}
+        USER_NAME: ${{ github.actor }}
+      run: |
+        DATETIME=$(git log -1 --format=%cd --date=iso-strict 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%SZ")
+        {
+          echo "repository=$REPOSITORY"
+          echo "branch=$BRANCH"
+          echo "user=$USER_NAME"
+          echo "datetime=$DATETIME"
+        } >> "$GITHUB_OUTPUT"
+        {
+          echo "### Commit Info"
+          echo "- **Repository:** $REPOSITORY"
+          echo "- **Branch:** $BRANCH"
+          echo "- **User:** $USER_NAME"
+          echo "- **Date/Time:** $DATETIME"
+        } >> "$GITHUB_STEP_SUMMARY"
+        echo "Repository: $REPOSITORY"
+        echo "Branch: $BRANCH"
+        echo "User: $USER_NAME"
+        echo "Date/Time: $DATETIME"

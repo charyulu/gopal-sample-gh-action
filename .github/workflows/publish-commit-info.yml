@@ -1,0 +1,8 @@
+name: Publish Commit Info
+on: [push, pull_request]
+jobs:
+  info:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
